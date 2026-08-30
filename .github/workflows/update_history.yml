@@ -1,0 +1,34 @@
+name: 每日更新历史事件
+
+on:
+  schedule:
+    - cron: '0 0 * * *'          # 每天 UTC 0:00（北京时间 8:00）
+  workflow_dispatch:             # 允许手动触发
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 设置 Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: 安装依赖
+        run: pip install requests
+
+      - name: 运行抓取脚本
+        run: python fetch_history.py
+
+      - name: 提交更改
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add history.json
+          git diff --staged --quiet || git commit -m "自动更新历史事件 $(date +'%Y-%m-%d')"
+          git push
