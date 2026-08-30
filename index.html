@@ -73,23 +73,15 @@
         }
         .event-list { list-style: none; padding: 0; }
         .event-item {
-            display: flex;
-            gap: 16px;
             padding: 14px 0;
             border-bottom: 1px solid #edf2f7;
-            align-items: baseline;
+            /* 移除 flex，改为普通块级 */
         }
         .event-item:last-child { border-bottom: none; }
-        .event-year {
-            flex-shrink: 0;
-            width: 70px;
-            font-weight: 600;
-            color: #2b6cb0;
-            font-size: 18px;
-        }
+        /* 不再需要 .event-year 样式，可以保留但无影响，或直接删除 */
         .event-text {
             font-size: 16px;
-            line-height: 1.6;
+            line-height: 1.8;
             color: #2d3748;
         }
         .event-text a {
@@ -127,8 +119,6 @@
             .card { padding: 20px 15px; }
             h1 { font-size: 22px; }
             h1 span { font-size: 14px; margin-left: 0; }
-            .event-item { flex-direction: column; gap: 4px; padding: 12px 0; }
-            .event-year { width: auto; font-size: 16px; }
         }
     </style>
 </head>
@@ -163,7 +153,6 @@
         const day = now.getDate();
         dateDisplay.textContent = `${month}月${day}日`;
 
-        // 加载同目录下的 history.json（由 GitHub Actions 生成）
         fetch('history.json')
             .then(res => {
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -183,18 +172,19 @@
                 events.forEach(event => {
                     const li = document.createElement('li');
                     li.className = 'event-item';
-                    const yearSpan = document.createElement('span');
-                    yearSpan.className = 'event-year';
-                    yearSpan.textContent = event.year || '未知';
-                    li.appendChild(yearSpan);
+
+                    // ----- 修改区域：构建完整日期 + 描述 -----
+                    const fullDate = `${event.year}年${month}月${day}日`;
                     const textSpan = document.createElement('span');
                     textSpan.className = 'event-text';
-                    let text = event.text || '';
+                    let text = `${fullDate} ${event.text || ''}`;
                     if (event.url) {
                         text += `（<a href="${event.url}" target="_blank">查看详情</a>）`;
                     }
                     textSpan.innerHTML = text;
                     li.appendChild(textSpan);
+                    // --------------------------------------
+
                     listEl.appendChild(li);
                 });
             })
