@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>历史上的今天</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            padding: 30px 25px 40px;
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1a202c;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        h1 span {
+            background: #ebf4ff;
+            color: #2b6cb0;
+            font-size: 18px;
+            font-weight: 500;
+            padding: 4px 14px;
+            border-radius: 30px;
+            margin-left: auto;
+        }
+        .loading {
+            text-align: center;
+            color: #4a5568;
+            padding: 40px 0;
+            font-size: 16px;
+        }
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-left: 12px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #2b6cb0;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .error {
+            background: #fff5f5;
+            color: #c53030;
+            padding: 16px 20px;
+            border-radius: 12px;
+            border-left: 5px solid #fc8181;
+            margin: 20px 0;
+        }
+        .event-list { list-style: none; padding: 0; }
+        .event-item {
+            display: flex;
+            gap: 16px;
+            padding: 14px 0;
+            border-bottom: 1px solid #edf2f7;
+            align-items: baseline;
+        }
+        .event-item:last-child { border-bottom: none; }
+        .event-year {
+            flex-shrink: 0;
+            width: 70px;
+            font-weight: 600;
+            color: #2b6cb0;
+            font-size: 18px;
+        }
+        .event-text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #2d3748;
+        }
+        .event-text a {
+            color: #2b6cb0;
+            text-decoration: none;
+            border-bottom: 1px dotted #bee3f8;
+        }
+        .event-text a:hover { border-bottom-color: #2b6cb0; }
+        .empty {
+            text-align: center;
+            color: #718096;
+            padding: 30px 0;
+            font-size: 16px;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 14px;
+            color: #a0aec0;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+            line-height: 1.8;
+        }
+        .footer a { color: #2b6cb0; text-decoration: none; }
+        .update-time { font-size: 12px; color: #a0aec0; margin-top: 5px; }
+        .disclaimer {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #a0aec0;
+            border-top: 1px dashed #e2e8f0;
+            padding-top: 12px;
+        }
+        .disclaimer span { font-weight: 500; color: #4a5568; }
+        @media (max-width: 600px) {
+            .card { padding: 20px 15px; }
+            h1 { font-size: 22px; }
+            h1 span { font-size: 14px; margin-left: 0; }
+            .event-item { flex-direction: column; gap: 4px; padding: 12px 0; }
+            .event-year { width: auto; font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>📅 历史上的今天 <span id="dateDisplay"></span></h1>
+
+    <div id="loading" class="loading">加载数据中…</div>
+    <div id="error" class="error" style="display: none;"></div>
+    <ul id="eventList" class="event-list"></ul>
+
+    <div class="footer">
+        <div>数据来源：<a href="https://www.apihz.cn/" target="_blank">接口盒子</a></div>
+        <div class="update-time" id="updateTime"></div>
+        <div class="disclaimer">
+            <span>📝 声明：</span>本站“历史上的今天”内容由 <strong>可爱小胖</strong> 使用 <strong>DeepSeek</strong> 辅助编写，数据调用自“接口盒子”API。<br>
+            本人不对所展示内容的准确性、完整性和时效性承担任何责任，仅供娱乐参考。
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const dateDisplay = document.getElementById('dateDisplay');
+        const loadingEl = document.getElementById('loading');
+        const errorEl = document.getElementById('error');
+        const listEl = document.getElementById('eventList');
+        const updateTimeEl = document.getElementById('updateTime');
+
+        const now = new Date();
+        const month = now.getMonth() + 1;
+        const day = now.getDate();
+        dateDisplay.textContent = `${month}月${day}日`;
+
+        // 加载同目录下的 history.json（由 GitHub Actions 生成）
+        fetch('history.json')
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.json();
+            })
+            .then(data => {
+                loadingEl.style.display = 'none';
+                if (data.update_time) {
+                    updateTimeEl.textContent = `数据更新于 ${data.update_time}`;
+                }
+                const events = data.events || [];
+                if (events.length === 0) {
+                    listEl.innerHTML = `<li class="empty">📭 今天暂无记录的历史事件</li>`;
+                    return;
+                }
+                events.sort((a, b) => parseInt(a.year) - parseInt(b.year));
+                events.forEach(event => {
+                    const li = document.createElement('li');
+                    li.className = 'event-item';
+                    const yearSpan = document.createElement('span');
+                    yearSpan.className = 'event-year';
+                    yearSpan.textContent = event.year || '未知';
+                    li.appendChild(yearSpan);
+                    const textSpan = document.createElement('span');
+                    textSpan.className = 'event-text';
+                    let text = event.text || '';
+                    if (event.url) {
+                        text += `（<a href="${event.url}" target="_blank">查看详情</a>）`;
+                    }
+                    textSpan.innerHTML = text;
+                    li.appendChild(textSpan);
+                    listEl.appendChild(li);
+                });
+            })
+            .catch(err => {
+                loadingEl.style.display = 'none';
+                errorEl.style.display = 'block';
+                errorEl.textContent = `数据加载失败：${err.message}。请确认仓库中已生成 history.json 文件。`;
+                console.error('加载失败:', err);
+            });
+    })();
+</script>
+</body>
+</html>
