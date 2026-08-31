@@ -45,7 +45,7 @@
 
 ## 📄 许可证
 
-[MIT](./LICENSE)（如果你需要，可以加上 LICENSE 文件）
+[MIT](./LICENSE)
 
 ---
 
