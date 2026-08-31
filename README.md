@@ -6,8 +6,7 @@
 ![网站截图](./screenshot.png)  
 *（将你的截图放在仓库根目录，命名为 `screenshot.png`，或修改此处路径）*
 
-🔗 **在线访问**：`https://你的用户名.github.io/history-today/`  
-*（替换为你的实际 Pages 地址）*
+🔗 **在线访问**：`https://keaixiaopang.github.io/history-today/`  
 
 ---
 
