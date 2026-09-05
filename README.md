@@ -4,7 +4,6 @@
 数据来源于「接口盒子」API，每日自动抓取，前端无跨域烦恼，页面优雅简洁。
 
 ![网站截图](./screenshot.png)  
-*（将你的截图放在仓库根目录，命名为 `screenshot.png`，或修改此处路径）*
 
 🔗 **在线访问**：[https://keaixiaopang.github.io/history-today/](https://keaixiaopang.github.io/history-today/)  
 
